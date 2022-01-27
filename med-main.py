@@ -182,16 +182,9 @@ def main():
     writer = SummaryWriter(log_dir=log_dir)
 
     opts = get_argparser().parse_args()
-    if opts.dataset.lower() == 'voc':
-        opts.num_classes = 21
-    elif opts.dataset.lower() == 'cityscapes':
-        opts.num_classes = 19
 
-    # Setup visualization
-    #vis = Visualizer(port=opts.vis_port,
-    #                 env=opts.vis_env) if opts.enable_vis else None
-    #if vis is not None:  # display options
-    #    vis.vis_table("Options", vars(opts))
+    if opts.dataset.lower() == 'med':
+        opts.num_classes = 2
 
     os.environ['CUDA_VISIBLE_DEVICES'] = opts.gpu_id
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -203,7 +196,7 @@ def main():
     random.seed(opts.random_seed)
 
     # Setup dataloader
-    if opts.dataset == 'voc' and not opts.crop_val:
+    if opts.dataset == 'med' and not opts.crop_val:
         opts.val_batch_size = 1
 
     train_dst, val_dst = get_dataset(opts)
@@ -213,6 +206,7 @@ def main():
         drop_last=True)  # drop_last=True to ignore single-image batches.
     val_loader = data.DataLoader(
         val_dst, batch_size=opts.val_batch_size, shuffle=True, num_workers=2)
+
     print("Dataset: %s, Train set: %d, Val set: %d" %
           (opts.dataset, len(train_dst), len(val_dst)))
 
@@ -256,7 +250,7 @@ def main():
         }, path)
         print("Model saved as %s" % path)
 
-    utils.mkdir('checkpoints')
+    utils.mkdir('checkpoints-med')
     # Restore
     best_score = 0.0
     cur_itrs = 0
@@ -311,8 +305,7 @@ def main():
 
             np_loss = loss.detach().cpu().numpy()
             interval_loss += np_loss
-            #if vis is not None:
-            #    vis.vis_scalar('Loss', cur_itrs, np_loss)
+
             writer.add_scalar('data/loss', np_loss, cur_itrs)
 
             if (cur_itrs) % 10 == 0:
@@ -330,26 +323,18 @@ def main():
                     opts=opts, model=model, loader=val_loader, device=device, metrics=metrics,
                     ret_samples_ids=vis_sample_id)
                 print(metrics.to_str(val_score))
+
                 if val_score['Mean IoU'] > best_score:  # save best model
                     best_score = val_score['Mean IoU']
                     save_ckpt('checkpoints/best_%s_%s_os%d.pth' %
                               (opts.model, opts.dataset, opts.output_stride))
-
+                
+                """ Validate보기!
+                """  
+                
                 writer.add_scalar('data/val overall Acc', val_score['Overall Acc'], cur_itrs)
                 writer.add_scalar('data/val Mean IoU', val_score['Mean IoU'], cur_itrs)
                 writer.add_scalar('data/val Class IoU', val_score['Class IoU'], cur_itrs)
-
-                #if vis is not None:  # visualize validation score and samples
-                #    vis.vis_scalar("[Val] Overall Acc", cur_itrs, val_score['Overall Acc'])
-                #    vis.vis_scalar("[Val] Mean IoU", cur_itrs, val_score['Mean IoU'])
-                #    vis.vis_table("[Val] Class IoU", val_score['Class IoU'])
-
-                #    for k, (img, target, lbl) in enumerate(ret_samples):
-                #        img = (denorm(img) * 255).astype(np.uint8)
-                #        target = train_dst.decode_target(target).transpose(2, 0, 1).astype(np.uint8)
-                #        lbl = train_dst.decode_target(lbl).transpose(2, 0, 1).astype(np.uint8)
-                #        concat_img = np.concatenate((img, target, lbl), axis=2)  # concat along width
-                #        vis.vis_image('Sample %d' % k, concat_img)
 
                 model.train()
             scheduler.step()
