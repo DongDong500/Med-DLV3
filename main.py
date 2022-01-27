@@ -110,7 +110,7 @@ def get_dataset(opts):
             et.ExtRandomHorizontalFlip(),
             et.ExtToTensor(),
             et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-                            std=[0.229, 0.224, 0.225]),
+                            std=[0.229, 0.224, 0.225]), 
         ])
         if opts.crop_val:
             val_transform = et.ExtCompose([
@@ -244,6 +244,7 @@ def main():
         opts.val_batch_size = 1
 
     train_dst, val_dst = get_dataset(opts)
+    # Data Load
     train_loader = data.DataLoader(
         train_dst, batch_size=opts.batch_size, shuffle=True, num_workers=2,
         drop_last=True)  # drop_last=True to ignore single-image batches.
