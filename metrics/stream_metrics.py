@@ -61,6 +61,12 @@ class StreamSegMetrics(_StreamMetrics):
             - mean IU
             - fwavacc
         """
+        """
+        5 0 0 2     acc: scalar
+        0 5 0 0     acc_cls: scalar
+        0 0 5 0     fwavacc: scalar
+        0 0 0 3     iu: iou per class, mean_iu: scalar, cls_iu: K-dim vector
+        """
         hist = self.confusion_matrix
         acc = np.diag(hist).sum() / hist.sum()
         acc_cls = np.diag(hist) / hist.sum(axis=1)
@@ -72,7 +78,7 @@ class StreamSegMetrics(_StreamMetrics):
         cls_iu = dict(zip(range(self.n_classes), iu))
 
         return {
-                "Overall Acc": acc,
+                "Overall Acc": acc, 
                 "Mean Acc": acc_cls,
                 "FreqW Acc": fwavacc,
                 "Mean IoU": mean_iu,

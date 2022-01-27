@@ -175,6 +175,16 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     img_id += 1
 
         score = metrics.get_results()
+        ''' 
+        metrics.get_results() type
+        {
+            "Overall Acc": acc, scalar
+            "Mean Acc": acc_cls, scalar
+            "FreqW Acc": fwavacc, scalar
+            "Mean IoU": mean_iu, scalar
+            "Class IoU": cls_iu, k-dim vector
+        }
+        '''
     return score, ret_samples
 
 def main():
@@ -337,7 +347,7 @@ def main():
                 
                 writer.add_scalar('data/val overall Acc', val_score['Overall Acc'], cur_itrs)
                 writer.add_scalar('data/val Mean IoU', val_score['Mean IoU'], cur_itrs)
-                writer.add_scalar('data/val Class IoU', val_score['Class IoU'], cur_itrs)
+                writer.add_scalar('data/val Mean IoU', val_score['Mean IoU'], cur_itrs)
 
                 model.train()
             scheduler.step()
