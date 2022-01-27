@@ -159,6 +159,9 @@ class VOCSegmentation(data.Dataset):
         """
         img = Image.open(self.images[index]).convert('RGB')
         target = Image.open(self.masks[index])
+
+        """ Transform PIL to tensor
+        """
         if self.transform is not None:
             img, target = self.transform(img, target)
 
