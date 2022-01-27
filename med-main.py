@@ -153,9 +153,12 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     pred = preds[i]
 
                     image = (denorm(image) * 255).transpose(1, 2, 0).astype(np.uint8)
+                    # data.DataLoader.dataset
+                    # data.DataLoader(dataset, batch_size=, shuffle=, num_workers=, ...)
                     target = loader.dataset.decode_target(target).astype(np.uint8)
                     pred = loader.dataset.decode_target(pred).astype(np.uint8)
 
+                    # Target, Image, Pred 이미지로 저장된다.
                     Image.fromarray(image).save('results/%d_image.png' % img_id)
                     Image.fromarray(target).save('results/%d_target.png' % img_id)
                     Image.fromarray(pred).save('results/%d_pred.png' % img_id)
