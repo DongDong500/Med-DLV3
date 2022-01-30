@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 
 from torch.utils import data
-from datasets import VOCSegmentation, Cityscapes
+from datasets import MEDSegmentation
 from utils import ext_transforms as et
 from metrics import StreamSegMetrics
 
@@ -28,12 +28,14 @@ def get_argparser():
     # Dataset Options
     """ path 지정해줘야 함.
     """
-    parser.add_argument("--data_root", type=str, default='./med-data',
+    parser.add_argument("--data_root", type=str, default='./datasets/data',
                         help="path to Dataset")
     parser.add_argument("--dataset", type=str, default="med", 
                         choices=['med'], help='Name of dataset')
     parser.add_argument("--num_clases", type=int, default=2,
                         help="num class (default: 2")
+    parser.add_argument("--version", type=str, default='220131',
+                        choices=['220131'], help='version of MED')
 
     # Deeplab Options
     available_models = sorted(name for name in network.modeling.__dict__ if name.islower() and \
@@ -81,8 +83,6 @@ def get_argparser():
                         help="print interval of loss (default: 10)")
     parser.add_argument("--val_interval", type=int, default=100,
                         help="epoch interval for eval (default: 100)")
-    parser.add_argument("--download", action='store_true', default=False,
-                        help="download datasets")
 
     return parser
     
@@ -113,10 +113,10 @@ def get_dataset(opts):
                 et.ExtNormalize(mean=[0.485, 0.456, 0.406],
                                 std=[0.229, 0.224, 0.225]),
             ])
-        train_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
-                                    image_set='train', download=opts.download, transform=train_transform)
-        val_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
-                                  image_set='val', download=False, transform=val_transform)
+        train_dst = MEDSegmentation(root=opts.data_root, version=opts.version,
+                                    image_set='train', transform=train_transform)
+        val_dst = MEDSegmentation(root=opts.data_root, version=opts.version,
+                                  image_set='val', transform=val_transform)
 
     return train_dst, val_dst
 
