@@ -1,7 +1,9 @@
 import collections
+from configparser import Interpolation
 import torchvision
 import torch
 import torchvision.transforms.functional as F
+from torchvision.transforms.functional import InterpolationMode
 import random 
 import numbers
 import numpy as np
@@ -94,7 +96,7 @@ class ExtCenterCrop(object):
 
 
 class ExtRandomScale(object):
-    def __init__(self, scale_range, interpolation=Image.BILINEAR):
+    def __init__(self, scale_range, interpolation=InterpolationMode.BILINEAR):
         self.scale_range = scale_range
         self.interpolation = interpolation
 
@@ -110,7 +112,7 @@ class ExtRandomScale(object):
         assert img.size == lbl.size
         scale = random.uniform(self.scale_range[0], self.scale_range[1])
         target_size = ( int(img.size[1]*scale), int(img.size[0]*scale) )
-        return F.resize(img, target_size, self.interpolation), F.resize(lbl, target_size, Image.NEAREST)
+        return F.resize(img, target_size, self.interpolation), F.resize(lbl, target_size, self.interpolation)
 
     def __repr__(self):
         interpolate_str = _pil_interpolation_to_str[self.interpolation]
