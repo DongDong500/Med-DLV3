@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import socket
 
+from torchvision.utils import save_image
+
 def get_argparser():
     parser = argparse.ArgumentParser()
 
@@ -62,11 +64,35 @@ def main():
     target = Image.open(maskdir)
     transform = get_dataset(opts=opts)
 
-    tmp = et.ExtRandomScale((0.5, 2.0))
+    tmp = et.ExtRandomScale((0.5, 1.0))
     img, target = tmp(img, target)
     print(img._size, target._size)
-    #if transform is not None:
-    #    img, target = transform(img, target)
+    img.save(os.path.join(rootDir, 'test-image/img-save-1.jpg'), 'JPEG')
+    target.save(os.path.join(rootDir, 'test-image/tar-save-1.jpg'), 'JPEG')
+
+    tmp = et.ExtRandomCrop(size=(opts.crop_size, opts.crop_size), pad_if_needed=True)
+    img, target = tmp(img, target)
+    print(img._size, target._size)
+    img.save(os.path.join(rootDir, 'test-image/img-save-2.jpg'), 'JPEG')
+    target.save(os.path.join(rootDir, 'test-image/tar-save-2.jpg'), 'JPEG')
+
+    tmp = et.ExtRandomHorizontalFlip()
+    img, target = tmp(img, target)
+    print(img._size, target._size)
+    img.save(os.path.join(rootDir, 'test-image/img-save-3.jpg'), 'JPEG')
+    target.save(os.path.join(rootDir, 'test-image/tar-save-3.jpg'), 'JPEG')
+
+    tmp = et.ExtToTensor()
+    img, target = tmp(img, target)
+    print(img.shape, target.shape)
+    save_image(img, os.path.join(rootDir, 'test-image/img-save-4.jpg'))
+    #save_image(target, os.path.join(rootDir, 'test-image/tar-save-4.jpg'))
+
+    tmp = et.ExtNormalize(mean=[0.485, 0.456, 0.406],
+                            std=[0.229, 0.224, 0.225])
+    img, target = tmp(img, target)
+    print(img.shape, target.shape)
+    save_image(img, os.path.join(rootDir, 'test-image/img-save-5.jpg'))
 
     
 
